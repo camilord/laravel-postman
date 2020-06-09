@@ -87,6 +87,24 @@ params that you want to see in postman.
 
 if the above method not supplied, will use the model fillable to fill it.
 
+### Documenting endpoints
+
+Laravel-Postman uses the docblocks above your methods to generate the documentation
+eg:
+
+```php
+/**
+  * this is the summary - which headlines the description
+  *
+  * this is the description - which goes on a new line under the summary (optional)
+  *
+  * @route-name My Custom Route Name (defaults to folder.model.method if not set)
+  *
+  * @param ...
+  ...
+  */
+```
+
 ### Export
 
 `php artisan laravelPostman:export`
