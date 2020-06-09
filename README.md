@@ -73,7 +73,13 @@ Add a property to your entity controller like this:
 
 ### Add a public method to your model class like this: (optional)
 
-`public function getPostmanParams() { return $this->fillable; }`
+```php
+public function getPostmanParams($method) { return [
+    'key1': 'sampleValue',
+    'key2' : ''
+];
+}
+```
 
 This array of params will be used to fill POST and PUT urlencoded form data section in
 postman. The previous method is just an example, you should return the array of

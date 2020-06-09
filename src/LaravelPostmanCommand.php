@@ -247,18 +247,16 @@ class LaravelPostmanCommand extends Command
             return [];
         }
 
+
         $body['mode'] = 'raw';
         $body['options'] = [
             "raw" => [
                 "language" => "json"
             ]
         ];
-        $body['raw'] = [];
-        foreach ($postmanParams as $param) {
-            $body['raw'][$param] = '';
-        }
 
-        $body['raw'] = json_encode($body['raw'], JSON_PRETTY_PRINT);
+        $body['raw'] = json_encode($postmanParams, JSON_PRETTY_PRINT);
+
 
         return $body;
     }
@@ -288,10 +286,10 @@ class LaravelPostmanCommand extends Command
 
 
         if (method_exists($postmanModel, 'getPostmanParams')) {
-            return $postmanModel->getPostmanParams();
+            return $postmanModel->getPostmanParams($method);
         }
 
-        return $postmanModel->getFillable();
+        return array_fill_keys($postmanModel->getFillable(), "");
     }
 
     protected function getDocs(\Illuminate\Routing\Route $route)
