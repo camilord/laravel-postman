@@ -74,10 +74,20 @@ Add a property to your entity controller like this:
 ### Add a public method to your model class like this: (optional)
 
 ```php
-public function getPostmanParams($method) { return [
-    'key1': 'sampleValue',
-    'key2' : ''
-];
+/**
+ * returns sample body for put/post request
+ *
+ * @param string $method - POST / PUT / PATCH etc.
+ * @param string|null $routeName - the routename from the routes file if set.
+ *
+ * @return array
+ * /
+public function getPostmanParams(string $method, ?string $routeName): array
+{
+    return [
+        'key1': 'sampleValue',
+        'key2' : ''
+    ];
 }
 ```
 

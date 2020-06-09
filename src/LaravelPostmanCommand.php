@@ -286,7 +286,7 @@ class LaravelPostmanCommand extends Command
 
 
         if (method_exists($postmanModel, 'getPostmanParams')) {
-            return $postmanModel->getPostmanParams($method);
+            return $postmanModel->getPostmanParams($method, $route->getName());
         }
 
         return array_fill_keys($postmanModel->getFillable(), "");
