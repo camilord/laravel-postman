@@ -136,7 +136,6 @@ class LaravelPostmanCommand extends Command
             : $routeName;
         }
 
-
         return [
             'name'     => $routeName,
             'request'  => [
@@ -144,6 +143,18 @@ class LaravelPostmanCommand extends Command
                 'url'         => $baseURL . $path,
                 'method'      => $method,
                 'body'        => $body,
+                "header"      => [
+                    [
+                        "key"   => "Accept",
+                        "value" => "application/json",
+                        "type"  => "text"
+                    ],
+                    [
+                        "key"   => "Content-Type",
+                        "value" => "application/json",
+                        "type"  => "text"
+                    ]
+                ],
             ],
             'response' => [],
         ];
@@ -231,19 +242,23 @@ class LaravelPostmanCommand extends Command
 
         $postmanParams = $this->getRouteParams($route, $method);
 
+
         if (empty($postmanParams)) {
             return [];
         }
 
-        $body['mode'] = 'urlencoded';
-        $body['urlencoded'] = [];
+        $body['mode'] = 'raw';
+        $body['options'] = [
+            "raw" => [
+                "language" => "json"
+            ]
+        ];
+        $body['raw'] = [];
         foreach ($postmanParams as $param) {
-            $body['urlencoded'][] = [
-                'key'     => $param,
-                'value'   => '',
-                'enabled' => true,
-            ];
+            $body['raw'][$param] = '';
         }
+
+        $body['raw'] = json_encode($body['raw'], JSON_PRETTY_PRINT);
 
         return $body;
     }
@@ -267,13 +282,16 @@ class LaravelPostmanCommand extends Command
 
         $postmanModel = $this->helper->getPostmanModel($route);
 
-        if (! is_object($postmanModel)
-            || ! method_exists($postmanModel, 'getPostmanParams')
-        ) {
+        if (! is_object($postmanModel)) {
             return [];
         }
 
-        return $postmanModel->getPostmanParams();
+
+        if (method_exists($postmanModel, 'getPostmanParams')) {
+            return $postmanModel->getPostmanParams();
+        }
+
+        return $postmanModel->getFillable();
     }
 
     protected function getDocs(\Illuminate\Routing\Route $route)

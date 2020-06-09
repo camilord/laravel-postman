@@ -71,13 +71,15 @@ Add a property to your entity controller like this:
 
 `public $postmanModel = 'App\MyEntityModel';`
 
-### Add a public method to your model class like this:
+### Add a public method to your model class like this: (optional)
 
 `public function getPostmanParams() { return $this->fillable; }`
 
 This array of params will be used to fill POST and PUT urlencoded form data section in
 postman. The previous method is just an example, you should return the array of
 params that you want to see in postman.
+
+if the above method not supplied, will use the model fillable to fill it.
 
 ### Export
 
