@@ -17,7 +17,7 @@ class Helper
     /**
      * Adds a trailing slash to the given path if it isn't already there
      *
-     * @param string $path
+     * @param  string $path
      * @return string
      */
     public function addTrailingSlash($path)
@@ -28,7 +28,7 @@ class Helper
     /**
      * Replaces laravel route parameters format with Postman parameters format
      *
-     * @param string $path
+     * @param  string $path
      * @return string
      */
     public function replaceGetParameters($path)
@@ -45,8 +45,7 @@ class Helper
     {
         $configURL = config('postman.apiURL');
 
-        if (!empty($configURL)) {
-
+        if (! empty($configURL)) {
             return $this->addTrailingSlash($configURL);
         }
 
@@ -62,14 +61,14 @@ class Helper
     {
         $apiPrefix = config('postman.apiPrefix');
 
-        return !empty($apiPrefix) ? $apiPrefix : 'api';
+        return ! empty($apiPrefix) ? $apiPrefix : 'api';
     }
 
     /**
      * Returns a postman collection structure array
      *
-     * @param string $collectionName
-     * @param string $collectionDescription
+     * @param  string $collectionName
+     * @param  string $collectionDescription
      * @return array
      */
     public function getCollectionStructure(
@@ -77,21 +76,44 @@ class Helper
         $collectionDescription
     ) {
         return [
-            'variables' => [],
-            'info' => [
-                'name' => $collectionName,
+            'variables' => [
+                [
+                    "id"    => uniqid(),
+                    "key"   => "api_url",
+                    "value" => $this->getBaseURL(),
+                    "type"  => "string"
+                ],
+                [
+                    "id"    => uniqid(),
+                    "key"   => "bearer_token",
+                    "value" => '',
+                    "type"  => "string"
+                ]
+            ],
+            "auth"      => [
+                "type"   => "bearer",
+                "bearer" => [
+                    [
+                        "key"   => "token",
+                        "value" => "{{bearer_token}}",
+                        "type"  => "string"
+                    ]
+                ]
+            ],
+            'info'      => [
+                'name'        => $collectionName,
                 '_postman_id' => uniqid(),
                 'description' => $collectionDescription,
-                'schema' => self::POSTMAN_SCHEMA,
+                'schema'      => self::POSTMAN_SCHEMA,
             ],
-            'item' => [],
+            'item'      => [],
         ];
     }
 
     /**
      * Obtains a postman folder name from the given laravel route
      *
-     * @param Illuminate\Routing\Route $route
+     * @param  Illuminate\Routing\Route $route
      * @return string
      */
     public function getRouteFolder($route)
@@ -99,7 +121,6 @@ class Helper
         $actionStringParts = explode('@', $route->getActionName());
 
         if (count($actionStringParts) === 1) {
-
             return 'Others';
         }
 
@@ -119,7 +140,6 @@ class Helper
         $exportDirectory = config('postman.exportDirectory');
 
         if (empty($exportDirectory)) {
-
             return $exportDirectory;
         }
 
@@ -129,26 +149,22 @@ class Helper
     /**
      * Finds out if a postman model can be get from the route
      *
-     * @param Illuminate\Routing\Route $route
+     * @param  Illuminate\Routing\Route $route
      * @return boolean
      */
     public function canGetPostmanModel($route)
     {
-        if (
-            method_exists($route, 'getController')
+        if (method_exists($route, 'getController')
             && is_object($route->getController())
             && property_exists($route->getController(), 'postmanModel')
         ) {
-
             return true;
         }
 
-        if (
-            method_exists($route, 'getAction')
+        if (method_exists($route, 'getAction')
             && is_array($route->getAction())
             && in_array('controller', array_keys($route->getAction()))
         ) {
-
             return true;
         }
 
@@ -163,8 +179,7 @@ class Helper
      */
     public function getPostmanModel($route)
     {
-        if (!$this->canGetPostmanModel($route)) {
-
+        if (! $this->canGetPostmanModel($route)) {
             return null;
         }
 
@@ -180,8 +195,7 @@ class Helper
         $controllerClass = $controllerAction[0];
         $controller = app($controllerClass);
 
-        if (!property_exists($controller, 'postmanModel')) {
-
+        if (! property_exists($controller, 'postmanModel')) {
             return null;
         }
 

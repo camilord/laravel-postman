@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 class LaravelPostmanCommand extends Command
 {
     protected $helper;
+    protected $factory;
 
     /**
      * The name and signature of the console command.
@@ -33,6 +34,9 @@ class LaravelPostmanCommand extends Command
     public function __construct(Helper $helper)
     {
         $this->helper = $helper;
+        $customTags = ['route-name' => RouteNameTag::class];
+
+        $this->factory  = \phpDocumentor\Reflection\DocBlockFactory::createInstance($customTags);
         parent::__construct();
     }
 
@@ -51,17 +55,15 @@ class LaravelPostmanCommand extends Command
         );
 
         foreach ($this->getRoutes() as $folderName => $folderRoutes) {
-
             $items = [];
             foreach ($folderRoutes as $route) {
-
                 $items = array_merge($this->getRouteItems($route), $items);
             }
 
             $collection['item'][] = [
-                'name' => $folderName,
+                'name'        => $folderName,
                 'description' => '',
-                'item' => $items,
+                'item'        => $items,
             ];
         }
 
@@ -74,22 +76,21 @@ class LaravelPostmanCommand extends Command
     /**
      * Returns an array of route items (route + method) for the given route
      *
-     * @param Illuminate\Routing\Route $route
+     * @param  Illuminate\Routing\Route $route
      * @return array
      */
     protected function getRouteItems(\Illuminate\Routing\Route $route)
     {
-        $baseURL = $this->helper->getBaseURL();
+        $baseURL = '{{api_url}}';
+
         $path = $this->helper->replaceGetParameters($route->uri());
         $routeName = $route->getName();
-        $routeNameFinal = !empty($routeName) ? $routeName : $path;
+        $routeNameFinal = ! empty($routeName) ? $routeName : $path;
         $methods = $route->methods();
         $items = [];
 
         foreach ($methods as $method) {
-
             if ($method === 'HEAD' && config('postman.skipHEAD', true)) {
-
                 continue;
             }
             $body = $this->getBody($route, $method);
@@ -110,11 +111,11 @@ class LaravelPostmanCommand extends Command
     /**
      * Returns an array with postman item format
      *
-     * @param string $routeName
-     * @param string $baseURL
-     * @param string $path
-     * @param string $method
-     * @param string $body
+     * @param  string $routeName
+     * @param  string $baseURL
+     * @param  string $path
+     * @param  string $method
+     * @param  string $body
      * @return string
      */
     protected function getItemStructure(
@@ -126,20 +127,23 @@ class LaravelPostmanCommand extends Command
         $docs
     ) {
 
+        $methodComment = '';
+        if ($docs) {
+            $docblock = $this->factory->create($docs);
+            $methodComment = $docblock->getSummary() . "\n\n" . $docblock->getDescription();
+            $routeName = ! empty($docblock->getTagsByName('route-name'))
+            ? (string) $docblock->getTagsByName('route-name')[0]
+            : $routeName;
+        }
 
-        $parts = explode("\n", $docs);
-        $methodComment = trim($parts[1], "\t* ");
-
-        // $args = $classMethod->getParameters();
-        // dd($parts, $args, $docs, $method_comment);
 
         return [
-            'name' => $routeName,
-            'request' => [
+            'name'     => $routeName,
+            'request'  => [
                 'description' => $methodComment,
-                'url' => $baseURL . $path,
-                'method' => $method,
-                'body' => $body,
+                'url'         => $baseURL . $path,
+                'method'      => $method,
+                'body'        => $body,
             ],
             'response' => [],
         ];
@@ -154,8 +158,7 @@ class LaravelPostmanCommand extends Command
     {
         $configCollectionName = config('postman.collectionName');
 
-        if (!empty($configCollectionName)) {
-
+        if (! empty($configCollectionName)) {
             return $configCollectionName;
         }
 
@@ -171,8 +174,7 @@ class LaravelPostmanCommand extends Command
     {
         $configCollectionDescription = config('postman.collectionDescription');
 
-        if (!empty($configCollectionDescription)) {
-
+        if (! empty($configCollectionDescription)) {
             return $configCollectionDescription;
         }
 
@@ -190,25 +192,29 @@ class LaravelPostmanCommand extends Command
     protected function getRoutes()
     {
         $resultRoutes = [];
-        $apiPrefix = $this->helper->getApiPrefix();
-        $apiPrefixLength = strlen($apiPrefix);
 
-        foreach (Route::getRoutes() as $route) {
+        $apiPrefix = explode(",", $this->helper->getApiPrefix());
 
-            $path = $route->uri();
-            if (substr($path, 0, $apiPrefixLength) !== $apiPrefix) {
-                $this->info('Omiting ' . $path);
+        foreach ($apiPrefix as $prefix) {
+            foreach (Route::getRoutes() as $route) {
+                $path = $route->uri();
+                $apiPrefixLength = strlen($prefix);
 
-                continue;
+                if (substr($path, 0, $apiPrefixLength) !== $prefix) {
+                    continue;
+                }
+
+                $routeFolder = $this->helper->getRouteFolder($route);
+                if (! isset($resultRoutes[$routeFolder])) {
+                    $resultRoutes[$routeFolder] = [];
+                }
+
+                $resultRoutes[$routeFolder][] = $route;
             }
-
-            $routeFolder = $this->helper->getRouteFolder($route);
-            if (!isset($resultRoutes[$routeFolder])) {
-                $resultRoutes[$routeFolder] = [];
-            }
-
-            $resultRoutes[$routeFolder][] = $route;
         }
+
+
+
 
         return $resultRoutes;
     }
@@ -216,8 +222,8 @@ class LaravelPostmanCommand extends Command
     /**
      * Returns an postman body array for the given route
      *
-     * @param Illuminate\Routing\Route $route
-     * @param string $method
+     * @param  \Illuminate\Routing\Route $route
+     * @param  string                   $method
      * @return array
      */
     protected function getBody($route, $method)
@@ -233,8 +239,8 @@ class LaravelPostmanCommand extends Command
         $body['urlencoded'] = [];
         foreach ($postmanParams as $param) {
             $body['urlencoded'][] = [
-                'key' => $param,
-                'value' => '',
+                'key'     => $param,
+                'value'   => '',
                 'enabled' => true,
             ];
         }
@@ -245,8 +251,8 @@ class LaravelPostmanCommand extends Command
     /**
      * Returns an array of the given route parameters
      *
-     * @param Illuminate\Routing\Route $route
-     * @param string $method
+     * @param  Illuminate\Routing\Route $route
+     * @param  string                   $method
      * @return array
      */
     protected function getRouteParams(\Illuminate\Routing\Route $route, $method)
@@ -255,18 +261,15 @@ class LaravelPostmanCommand extends Command
             return [];
         }
 
-        if (!$this->helper->canGetPostmanModel($route)) {
-
+        if (! $this->helper->canGetPostmanModel($route)) {
             return [];
         }
 
         $postmanModel = $this->helper->getPostmanModel($route);
 
-        if (
-            !is_object($postmanModel)
-            || !method_exists($postmanModel, 'getPostmanParams')
+        if (! is_object($postmanModel)
+            || ! method_exists($postmanModel, 'getPostmanParams')
         ) {
-
             return [];
         }
 
