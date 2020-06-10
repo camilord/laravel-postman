@@ -5,7 +5,7 @@ namespace Phpsa\LaravelPostman;
 class Helper
 {
     const CONTROLLER_STRING_INDEX = 0;
-    const POSTMAN_SCHEMA = 'https://schema.getpostman.com/json/collection/v2.0.0/collection.json';
+    const POSTMAN_SCHEMA = 'https://schema.getpostman.com/json/collection/v2.0.1/collection.json';
 
     /**
      * Class constructor
@@ -94,8 +94,17 @@ class Helper
                 "type"   => "bearer",
                 "bearer" => [
                     [
+                        "key"   => "0",
+                        "value" => [
+                            "key"   => "token",
+                            "value" => "bearer {{bearer_token}}",
+                            "type"  => "string"
+                        ],
+                        "type"  => "any"
+                    ],
+                    [
                         "key"   => "token",
-                        "value" => "{{bearer_token}}",
+                        "value" => "bearer {{bearer_token}}",
                         "type"  => "string"
                     ]
                 ]
