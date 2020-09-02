@@ -85,8 +85,8 @@ Add a property to your entity controller like this:
 public function getPostmanParams(string $method, ?string $routeName): array
 {
     return [
-        'key1': 'sampleValue',
-        'key2' : ''
+        'key1' => 'sampleValue',
+        'key2' => ''
     ];
 }
 ```
