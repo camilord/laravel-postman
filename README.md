@@ -117,4 +117,6 @@ eg:
 
 ### Export
 
-`php artisan laravelPostman:export`
+`php artisan laravelPostman:export` 
+
+Optionally you can limit to a specific controller, or list of controllers by passing the `-C` parameter and the controllers you wish to use.
