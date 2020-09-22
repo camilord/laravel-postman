@@ -4,6 +4,7 @@ namespace Phpsa\LaravelPostman;
 
 use ReflectionClass;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 
 class LaravelPostmanCommand extends Command
@@ -16,7 +17,7 @@ class LaravelPostmanCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'postman:export';
+    protected $signature = 'postman:export {--C|controllers=*}';
     protected $name = 'postman:export';
 
     /**
@@ -53,6 +54,7 @@ class LaravelPostmanCommand extends Command
             $collectionName,
             $collectionDescription
         );
+
 
         foreach ($this->getRoutes() as $folderName => $folderRoutes) {
             $items = [];
@@ -206,6 +208,8 @@ class LaravelPostmanCommand extends Command
 
         $apiPrefix = explode(",", $this->helper->getApiPrefix());
 
+        $filtered = $this->getFilteredControllers();
+
         foreach ($apiPrefix as $prefix) {
             foreach (Route::getRoutes() as $route) {
                 $path = $route->uri();
@@ -215,7 +219,12 @@ class LaravelPostmanCommand extends Command
                     continue;
                 }
 
+                if($filtered->isNotEmpty() && $filtered->search(class_basename( $route->getController() )) === false){
+                    continue;
+                }
+
                 $routeFolder = $this->helper->getRouteFolder($route);
+
                 if (! isset($resultRoutes[$routeFolder])) {
                     $resultRoutes[$routeFolder] = [];
                 }
@@ -224,10 +233,21 @@ class LaravelPostmanCommand extends Command
             }
         }
 
-
-
-
         return $resultRoutes;
+    }
+
+    protected function getFilteredControllers(): Collection
+    {
+        $controllers = collect($this->option('controllers'));
+        $only = collect([]);
+        if($controllers->isNotEmpty()){
+            foreach($controllers as $controller){
+                $names = explode(",", $controller);
+                $only = $only->merge($names);
+            }
+        }
+
+        return $only;
     }
 
     /**
