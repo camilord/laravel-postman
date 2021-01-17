@@ -314,8 +314,12 @@ class LaravelPostmanCommand extends Command
 
     protected function getDocs(\Illuminate\Routing\Route $route)
     {
-        $class = new ReflectionClass($route->getController());
-        $classMethod = $class->getMethod($route->getActionMethod());
-        return $classMethod->getDocComment();
+        try {
+            $class = new ReflectionClass($route->getController());
+            $classMethod = $class->getMethod($route->getActionMethod());
+            return $classMethod->getDocComment();
+        }catch(\Throwable $error){
+            return false;
+        }
     }
 }
