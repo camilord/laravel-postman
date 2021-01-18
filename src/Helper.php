@@ -165,7 +165,10 @@ class Helper
     {
         if (method_exists($route, 'getController')
             && is_object($route->getController())
-            && property_exists($route->getController(), 'postmanModel')
+            && (
+                property_exists($route->getController(), 'postmanModel')
+                || method_exists($route->getController(), 'getPostmanModel')
+                )
         ) {
             return true;
         }
@@ -197,6 +200,11 @@ class Helper
                 $postmanModelClass = $route->getController()->postmanModel;
                 return new $postmanModelClass();
             }
+            if(method_exists($route->getController(), 'getPostmanModel'))
+            {
+                $postmanModelClass = $route->getController()->getPostmanModel();
+                return new $postmanModelClass();
+            }
         }
 
         $action = $route->getAction();
@@ -204,12 +212,17 @@ class Helper
         $controllerClass = $controllerAction[0];
         $controller = app($controllerClass);
 
-        if (! property_exists($controller, 'postmanModel')) {
-            return null;
+        if ( property_exists($controller, 'postmanModel')) {
+            $postmanModelClass = $controller->postmanModel;
+            return new $postmanModelClass();
         }
-
-        $postmanModelClass = $controller->postmanModel;
-
-        return new $postmanModelClass();
+        
+        if ( method_exists($controller, 'getPostmanModel')) {
+            $postmanModelClass = $controller->getPostmanModel();
+            return new $postmanModelClass();
+        }
+        
+        return null;
+        
     }
 }
