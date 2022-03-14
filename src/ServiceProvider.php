@@ -19,7 +19,7 @@ class ServiceProvider extends LaravelServiceProvider
     {
         $this->publishes([
             self::CONFIG_PATH => config_path('postman.php'),
-        ], 'config');
+        ], 'laravel-postman-config');
     }
 
     /**
@@ -35,10 +35,10 @@ class ServiceProvider extends LaravelServiceProvider
             'postman'
         );
 
-        $this->app->singleton('Phpsa\LaravelPostman\Helper', static function ($app) {
+        $this->app->singleton(Helper::class, static function ($app) {
             return new Helper();
         });
 
-        $this->commands('Phpsa\LaravelPostman\LaravelPostmanCommand');
+        $this->commands(LaravelPostmanCommand::class);
     }
 }

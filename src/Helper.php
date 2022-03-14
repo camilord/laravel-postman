@@ -191,6 +191,7 @@ class Helper
      */
     public function getPostmanModel($route)
     {
+
         if (! $this->canGetPostmanModel($route)) {
             return null;
         }
