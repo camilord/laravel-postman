@@ -6,6 +6,8 @@ use ReflectionClass;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Routing\Route as RoutingRoute;
+use phpDocumentor\Reflection\DocBlockFactory;
 
 class LaravelPostmanCommand extends Command
 {
@@ -37,7 +39,7 @@ class LaravelPostmanCommand extends Command
         $this->helper = $helper;
         $customTags = ['route-name' => RouteNameTag::class];
 
-        $this->factory  = \phpDocumentor\Reflection\DocBlockFactory::createInstance($customTags);
+        $this->factory  = DocBlockFactory::createInstance($customTags);
         parent::__construct();
     }
 
@@ -78,10 +80,10 @@ class LaravelPostmanCommand extends Command
     /**
      * Returns an array of route items (route + method) for the given route
      *
-     * @param  Illuminate\Routing\Route $route
+     * @param  \Illuminate\Routing\Route $route
      * @return array
      */
-    protected function getRouteItems(\Illuminate\Routing\Route $route)
+    protected function getRouteItems(RoutingRoute $route)
     {
         $baseURL = '{{api_url}}';
 
@@ -117,8 +119,8 @@ class LaravelPostmanCommand extends Command
      * @param  string $baseURL
      * @param  string $path
      * @param  string $method
-     * @param  string $body
-     * @return string
+     * @param  array<string,mixed> $body
+     * @return array<string,mixed>
      */
     protected function getItemStructure(
         $routeName,
@@ -127,7 +129,7 @@ class LaravelPostmanCommand extends Command
         $method,
         $body,
         $docs
-    ) {
+    ): array {
 
         $methodComment = '';
         if ($docs) {
@@ -219,7 +221,7 @@ class LaravelPostmanCommand extends Command
                     continue;
                 }
 
-                if($filtered->isNotEmpty() && $filtered->search(class_basename( $route->getController() )) === false){
+                if ($filtered->isNotEmpty() && $filtered->search(class_basename($route->getController())) === false) {
                     continue;
                 }
 
@@ -240,8 +242,8 @@ class LaravelPostmanCommand extends Command
     {
         $controllers = collect($this->option('controllers'));
         $only = collect([]);
-        if($controllers->isNotEmpty()){
-            foreach($controllers as $controller){
+        if ($controllers->isNotEmpty()) {
+            foreach ($controllers as $controller) {
                 $names = explode(",", $controller);
                 $only = $only->merge($names);
             }
@@ -257,7 +259,7 @@ class LaravelPostmanCommand extends Command
      * @param  string                   $method
      * @return array
      */
-    protected function getBody($route, $method)
+    protected function getBody(RoutingRoute $route, $method)
     {
 
         $postmanParams = $this->getRouteParams($route, $method);
@@ -284,11 +286,11 @@ class LaravelPostmanCommand extends Command
     /**
      * Returns an array of the given route parameters
      *
-     * @param  Illuminate\Routing\Route $route
+     * @param  \Illuminate\Routing\Route $route
      * @param  string                   $method
      * @return array
      */
-    protected function getRouteParams(\Illuminate\Routing\Route $route, $method)
+    protected function getRouteParams(RoutingRoute $route, $method)
     {
         if ($method === 'GET' || $method === 'DELETE') {
             return [];
@@ -312,13 +314,13 @@ class LaravelPostmanCommand extends Command
         return array_fill_keys($postmanModel->getFillable(), "");
     }
 
-    protected function getDocs(\Illuminate\Routing\Route $route)
+    protected function getDocs(RoutingRoute $route)
     {
         try {
             $class = new ReflectionClass($route->getController());
             $classMethod = $class->getMethod($route->getActionMethod());
             return $classMethod->getDocComment();
-        }catch(\Throwable $error){
+        } catch (\Throwable $error) {
             return false;
         }
     }

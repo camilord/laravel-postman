@@ -2,17 +2,13 @@
 
 namespace Phpsa\LaravelPostman;
 
+use Illuminate\Support\Str;
+use Illuminate\Routing\Route;
+
 class Helper
 {
     const CONTROLLER_STRING_INDEX = 0;
     const POSTMAN_SCHEMA = 'https://schema.getpostman.com/json/collection/v2.0.1/collection.json';
-
-    /**
-     * Class constructor
-     */
-    public function __construct()
-    {
-    }
 
     /**
      * Adds a trailing slash to the given path if it isn't already there
@@ -22,7 +18,7 @@ class Helper
      */
     public function addTrailingSlash($path)
     {
-        return $path  . (substr($path, -1) === '/' ?: '/');
+        return $path . (Str::endsWith($path, '/') ?: '/');
     }
 
     /**
@@ -33,7 +29,7 @@ class Helper
      */
     public function replaceGetParameters($path)
     {
-        return str_replace(['{', '}'], [':', ''], $path);
+        return Str::replace(['{', '}'], [':', ''], $path);
     }
 
     /**
@@ -122,10 +118,10 @@ class Helper
     /**
      * Obtains a postman folder name from the given laravel route
      *
-     * @param  Illuminate\Routing\Route $route
+     * @param  \Illuminate\Routing\Route $route
      * @return string
      */
-    public function getRouteFolder($route)
+    public function getRouteFolder(Route $route)
     {
         $actionStringParts = explode('@', $route->getActionName());
 
@@ -158,7 +154,7 @@ class Helper
     /**
      * Finds out if a postman model can be get from the route
      *
-     * @param  Illuminate\Routing\Route $route
+     * @param  \Illuminate\Routing\Route $route
      * @return boolean
      */
     public function canGetPostmanModel($route)
@@ -186,7 +182,7 @@ class Helper
     /**
      * Returns a route's postman model
      *
-     * @param  Illuminate\Routing\Route $route
+     * @param  \Illuminate\Routing\Route $route
      * @return object|null
      */
     public function getPostmanModel($route)
@@ -201,8 +197,7 @@ class Helper
                 $postmanModelClass = $route->getController()->postmanModel;
                 return new $postmanModelClass();
             }
-            if(method_exists($route->getController(), 'getPostmanModel'))
-            {
+            if (method_exists($route->getController(), 'getPostmanModel')) {
                 $postmanModelClass = $route->getController()->getPostmanModel();
                 return new $postmanModelClass();
             }
@@ -213,17 +208,16 @@ class Helper
         $controllerClass = $controllerAction[0];
         $controller = app($controllerClass);
 
-        if ( property_exists($controller, 'postmanModel')) {
+        if (property_exists($controller, 'postmanModel')) {
             $postmanModelClass = $controller->postmanModel;
             return new $postmanModelClass();
         }
-        
-        if ( method_exists($controller, 'getPostmanModel')) {
+
+        if (method_exists($controller, 'getPostmanModel')) {
             $postmanModelClass = $controller->getPostmanModel();
             return new $postmanModelClass();
         }
-        
+
         return null;
-        
     }
 }

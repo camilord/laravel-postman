@@ -7,9 +7,8 @@ use phpDocumentor\Reflection\DocBlock\DescriptionFactory;
 use phpDocumentor\Reflection\DocBlock\Tags\BaseTag;
 use phpDocumentor\Reflection\Types\Context;
 use Webmozart\Assert\Assert;
-use phpDocumentor\Reflection\DocBlock\Tags\Factory\StaticMethod;
 
-final class RouteNameTag extends BaseTag implements StaticMethod
+final class RouteNameTag extends BaseTag
 {
 
     protected $name = 'route-name';
