@@ -51,13 +51,14 @@ class Helper
     /**
      * Returns the API prefix string
      *
-     * @return string
+     * @return array<int, string>
      */
-    public function getApiPrefix()
+     public function getApiPrefix($key = 'apiPrefix'): ?array
     {
-        $apiPrefix = config('postman.apiPrefix');
-
-        return ! empty($apiPrefix) ? $apiPrefix : 'api';
+        $apiPrefix = config('postman.' . $key, null);
+        return ! blank($apiPrefix)
+        ? collect(explode(",", $apiPrefix))->map(fn($str) => Str::of($str)->rtrim("/")->append("/")->toString())->toArray()
+        : null;
     }
 
     /**
@@ -123,16 +124,22 @@ class Helper
      */
     public function getRouteFolder(Route $route)
     {
+        $path = $route->getPrefix();
+        if(blank($path)) {
+            $path = 'others';
+        }
+        $base = Str::of($path)->ltrim('/')->rtrim('/')->ucfirst()->toString();
+
         $actionStringParts = explode('@', $route->getActionName());
 
         if (count($actionStringParts) === 1) {
-            return 'Others';
+            return $base;
         }
 
         $fullController = $actionStringParts[self::CONTROLLER_STRING_INDEX];
         $controllerClass = explode('\\', $fullController);
 
-        return  str_replace('Controller', '', last($controllerClass));
+        return  $base . '/' . str_replace('Controller', '', last($controllerClass));
     }
 
     /**
@@ -157,8 +164,13 @@ class Helper
      * @param  \Illuminate\Routing\Route $route
      * @return boolean
      */
-    public function canGetPostmanModel($route)
+    public function canGetPostmanModel($route): bool
     {
+
+        if($route->getActionName() === 'Closure'){
+            return false;
+        }
+
         if (method_exists($route, 'getController')
             && is_object($route->getController())
             && (
