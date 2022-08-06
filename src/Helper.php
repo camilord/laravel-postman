@@ -51,7 +51,7 @@ class Helper
     /**
      * Returns the API prefix string
      *
-     * @return  @return array<int, string>
+     * @return  ?array<int, string>
      */
      public function getApiPrefix($key = 'apiPrefix'): ?array
     {
