@@ -7,8 +7,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Routing\Route as RoutingRoute;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use phpDocumentor\Reflection\DocBlockFactory;
 
 class LaravelPostmanCommand extends Command
@@ -45,8 +43,6 @@ class LaravelPostmanCommand extends Command
         parent::__construct();
     }
 
-
-
     /**
      * Execute the console command.
      *
@@ -61,54 +57,25 @@ class LaravelPostmanCommand extends Command
             $collectionDescription
         );
 
-        $collectionItems = [];
-        foreach($this->getRoutes() as $folderName => $folderRoutes){
-            $parts = explode("/", $folderName);
-            $folderName = array_shift($parts);
 
+        foreach ($this->getRoutes() as $folderName => $folderRoutes) {
             $items = [];
-
             foreach ($folderRoutes as $route) {
                 $items = array_merge($this->getRouteItems($route), $items);
             }
 
-            if(!isset($collectionItems[$folderName])){
-                $collectionItems[$folderName] = [
-                     'name'        => $folderName,
-                     'description' => '',
-                     'item'        => [],
-                ];
-            }
-            if(!blank($parts)){
-                $sub = implode("/", $parts);
-                $collectionItems[$folderName]['item'][$sub] ??= [
-                    'name'        => $sub,
-                     'description' => '',
-                     'item'        => [],
-                ];
-
-                $collectionItems[$folderName]['item'][$sub]['item'] = array_merge($collectionItems[$folderName]['item'][$sub]['item'], $items);
-
-            }else{
-                $collectionItems[$folderName]['item'] = $items;
-            }
-
-
+            $collection['item'][] = [
+                'name'        => $folderName,
+                'description' => '',
+                'item'        => $items,
+            ];
         }
-        foreach($collectionItems as &$cur)
-        {
-            $cur['item'] = array_values($cur['item']);
-        }
-
-         $collection['item'] = array_values( $collectionItems );
-
 
         file_put_contents(
             $this->helper->getExportDirectory() . 'postman.json',
             json_encode($collection)
         );
     }
-
 
     /**
      * Returns an array of route items (route + method) for the given route
@@ -235,38 +202,37 @@ class LaravelPostmanCommand extends Command
     /**
      * Returns an array of API routes organized by folders
      *
-     * @return array<string, mixed>
+     * @return array
      */
-    protected function getRoutes(): array
+    protected function getRoutes()
     {
         $resultRoutes = [];
 
-        $apiPrefix = $this->helper->getApiPrefix();
-        $ignore = $this->helper->getApiPrefix('ignore');
+        $apiPrefix = explode(",", $this->helper->getApiPrefix());
 
         $filtered = $this->getFilteredControllers();
 
-        foreach (Route::getRoutes() as $route) {
+        foreach ($apiPrefix as $prefix) {
+            foreach (Route::getRoutes() as $route) {
+                $path = $route->uri();
+                $apiPrefixLength = strlen($prefix);
 
-            if(! blank($apiPrefix) && Str::of($route->uri())->startsWith($apiPrefix) === false){
-                continue;
+                if (substr($path, 0, $apiPrefixLength) !== $prefix) {
+                    continue;
+                }
+
+                if ($filtered->isNotEmpty() && $filtered->search(class_basename($route->getController())) === false) {
+                    continue;
+                }
+
+                $routeFolder = $this->helper->getRouteFolder($route);
+
+                if (! isset($resultRoutes[$routeFolder])) {
+                    $resultRoutes[$routeFolder] = [];
+                }
+
+                $resultRoutes[$routeFolder][] = $route;
             }
-
-            if(! blank($ignore) && Str::of($route->uri())->startsWith($ignore) === true){
-                continue;
-            }
-
-            if ($filtered->isNotEmpty() && $filtered->search(class_basename($route->getController())) === false) {
-                continue;
-            }
-
-            $routeFolder = $this->helper->getRouteFolder($route);
-
-            if (! isset($resultRoutes[$routeFolder])) {
-                $resultRoutes[$routeFolder] = [];
-            }
-
-            $resultRoutes[$routeFolder][] = $route;
         }
 
         return $resultRoutes;
