@@ -1,3 +1,16 @@
+# [4.1.0](https://git.customd.com/composer/laravel-postman/compare/v4.0.0...v4.1.0) (2022-08-06)
+
+
+### Bug Fixes
+
+* bring over ignore ([87b2674](https://git.customd.com/composer/laravel-postman/commit/87b267460605bba635082c4fcadf2d3499e5a7b6))
+* updated to allow root paths ([2493574](https://git.customd.com/composer/laravel-postman/commit/24935744618bbc3c4d36906a5cfa8b2363deb015))
+
+
+### Features
+
+* fix config ([0db102d](https://git.customd.com/composer/laravel-postman/commit/0db102dfaefdce4220c527bf3b29b819e596d79c))
+
 # [3.0.0](https://git.customd.com/composer/laravel-postman/compare/v2.2.2...v3.0.0) (2022-03-14)
 
 
