@@ -25,6 +25,7 @@ Note: publishing the configuration file is optional, you can use de default pack
 - LARAVEL_POSTMAN_COLLECTION_NAME => your collection name
 - LARAVEL_POSTMAN_COLLECTION_DESCRIPTION => description of collection
 - LARAVEL_POSTMAN_API_PREFIX => comma list of routes to include (default api,oauth)
+- LARAVEL_POSTMAN_API_PREFIX_IGNORE => comma list of routes to exclude (default _ignition)
 - LARAVEL_POSTMAN_SKIP_HEAD => skip head routes - default true
 - LARAVEL_POSTMAN_EXPORT_DIRECTORY => where to store the file, default storage folder
   ];
