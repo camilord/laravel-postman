@@ -51,7 +51,7 @@ class Helper
     /**
      * Returns the API prefix string
      *
-     * @return array<int, string>
+     * @return  @return array<int, string>
      */
      public function getApiPrefix($key = 'apiPrefix'): ?array
     {
@@ -126,20 +126,18 @@ class Helper
     {
         $path = $route->getPrefix();
         if(blank($path)) {
-            $path = 'others';
+            $path = '/';
         }
-        $base = Str::of($path)->ltrim('/')->rtrim('/')->ucfirst()->toString();
-
         $actionStringParts = explode('@', $route->getActionName());
-
         if (count($actionStringParts) === 1) {
-            return $base;
+           // dd($actionStringParts, $path);
+            return str($path)->before('/')->ucFirst()->toString() ?? '/';
         }
 
         $fullController = $actionStringParts[self::CONTROLLER_STRING_INDEX];
         $controllerClass = explode('\\', $fullController);
 
-        return  $base . '/' . str_replace('Controller', '', last($controllerClass));
+        return  str_replace('Controller', '', last($controllerClass));
     }
 
     /**
@@ -166,11 +164,9 @@ class Helper
      */
     public function canGetPostmanModel($route): bool
     {
-
         if($route->getActionName() === 'Closure'){
             return false;
         }
-
         if (method_exists($route, 'getController')
             && is_object($route->getController())
             && (
