@@ -53,11 +53,12 @@ class Helper
      *
      * @return string
      */
-    public function getApiPrefix()
+     public function getApiPrefix($key = 'apiPrefix'): ?array
     {
-        $apiPrefix = config('postman.apiPrefix');
-
-        return ! empty($apiPrefix) ? $apiPrefix : 'api';
+        $apiPrefix = config('postman.' . $key, null);
+        return ! blank($apiPrefix)
+        ? collect(explode(",", $apiPrefix))->map(fn($str) => Str::of($str)->rtrim("/")->append("/")->toString())->toArray()
+        : null;
     }
 
     /**
@@ -123,8 +124,11 @@ class Helper
      */
     public function getRouteFolder(Route $route)
     {
+        $path = $route->getPrefix();
+        if(blank($path)) {
+            $path = 'others';
+        }
         $actionStringParts = explode('@', $route->getActionName());
-
         if (count($actionStringParts) === 1) {
             return 'Others';
         }
@@ -159,6 +163,9 @@ class Helper
      */
     public function canGetPostmanModel($route)
     {
+        if($route->getActionName() === 'Closure'){
+            return false;
+        }
         if (method_exists($route, 'getController')
             && is_object($route->getController())
             && (

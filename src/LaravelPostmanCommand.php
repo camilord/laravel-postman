@@ -7,6 +7,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Routing\Route as RoutingRoute;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use phpDocumentor\Reflection\DocBlockFactory;
 
 class LaravelPostmanCommand extends Command
@@ -208,7 +210,8 @@ class LaravelPostmanCommand extends Command
     {
         $resultRoutes = [];
 
-        $apiPrefix = explode(",", $this->helper->getApiPrefix());
+        $apiPrefix = $this->helper->getApiPrefix();
+        $ignore = $this->helper->getApiPrefix('ignore');
 
         $filtered = $this->getFilteredControllers();
 
