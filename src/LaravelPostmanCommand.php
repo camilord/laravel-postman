@@ -215,28 +215,32 @@ class LaravelPostmanCommand extends Command
 
         $filtered = $this->getFilteredControllers();
 
-        foreach ($apiPrefix as $prefix) {
-            foreach (Route::getRoutes() as $route) {
-                $path = $route->uri();
-                $apiPrefixLength = strlen($prefix);
+        $routes = Route::getRoutes()->getRoutes();
 
-                if (substr($path, 0, $apiPrefixLength) !== $prefix) {
-                    continue;
-                }
+       // dd($apiPrefix);
 
-                if ($filtered->isNotEmpty() && $filtered->search(class_basename($route->getController())) === false) {
-                    continue;
-                }
+        foreach($routes as $route)
+        {
+            $uri = $route->uri();
+            if(!is_null($apiPrefix) && !Str::startsWith($uri, $apiPrefix) ||  Str::startsWith($uri, $ignore))
+            {
+                continue;
+            }
 
-                $routeFolder = $this->helper->getRouteFolder($route);
 
-                if (! isset($resultRoutes[$routeFolder])) {
+            if ($filtered->isNotEmpty() && $filtered->search(class_basename($route->getController())) === false) {
+                continue;
+            }
+
+            $routeFolder = $this->helper->getRouteFolder($route);
+
+             if (! isset($resultRoutes[$routeFolder])) {
                     $resultRoutes[$routeFolder] = [];
                 }
 
                 $resultRoutes[$routeFolder][] = $route;
+
             }
-        }
 
         return $resultRoutes;
     }
