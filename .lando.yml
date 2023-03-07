@@ -1,0 +1,78 @@
+name: "LaravelPostman"
+recipe: lamp
+config:
+  via: "cli"
+  php: "8.2"
+  scanner: false
+
+services:
+  appserver:
+    scanner: false
+  php81:
+    type: php:8.1
+    via: "cli"
+    scanner: false
+  php80:
+    type: php:8.0
+    via: "cli"
+    scanner: false
+
+
+tooling:
+  cleanup:
+    cmd: rm -rf vendor composer.lock
+
+  setup81:
+    service: php81
+    cmd: rm -rf vendor composer.lock && composer install
+
+  setup80:
+    service: php80
+    cmd: rm -rf vendor composer.lock && composer install
+
+  setup82:
+    service: appserver
+    cmd: rm -rf vendor composer.lock && composer install
+
+  test82:
+    service: appserver
+    cmd: composer test
+  test81:
+    service: php81
+    cmd: composer test
+  test80:
+    service: php80
+    cmd: composer test
+
+
+  stan82:
+    service: appserver
+    cmd: composer phpstan
+  stan81:
+    service: php81
+    cmd: composer phpstan
+  stan80:
+    service: php80
+    cmd: composer phpstan
+
+  all82:
+    service: appserver
+    cmd:
+      - rm -rf vendor composer.lock && composer install
+      - composer test
+      - composer phpstan
+
+  all81:
+    service: php81
+    cmd:
+      - rm -rf vendor composer.lock && composer install
+      - composer test
+      - composer phpstan
+  all80:
+    service: php80
+    cmd:
+      - rm -rf vendor composer.lock && composer install
+      - composer test
+      - composer phpstan
+
+
