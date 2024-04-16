@@ -42,7 +42,7 @@ jobs:
            composer require "illuminate/database=${{ matrix.laravel }}" --no-update
            composer update --prefer-dist --no-interaction --no-progress
       - name: Execute tests
-        run: vendor/bin/phpunit --verbose --testdox
+        run: vendor/bin/phpunit 
 
       - name: Upload artifacts (on failure)
         uses: actions/upload-artifact@master
