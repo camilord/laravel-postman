@@ -11,7 +11,7 @@ use Webmozart\Assert\Assert;
 final class RouteNameTag extends BaseTag
 {
 
-    protected $name = 'route-name';
+    protected string $name = 'route-name';
 
     /**
      * The constructor for this Tag; this should contain all properties for this object.
