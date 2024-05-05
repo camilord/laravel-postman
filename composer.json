@@ -1,5 +1,5 @@
 {
-  "name": "phpsa/laravel-postman",
+  "name": "camilord/laravel-postman",
   "type": "library",
   "description": "Export laravel API routes to postman",
   "keywords": [
@@ -22,11 +22,17 @@
       "email": "jimenez@maximiliano.com.ar",
       "homepage": "http://maximiliano.com.ar",
       "role": "Developer"
+    },
+    {
+      "name": "Camilo Lozano III",
+      "email": "me@camilord.com",
+      "homepage": "http://camilord.com",
+      "role": "Developer"
     }
   ],
   "require": {
-    "php": "^8.1",
-    "illuminate/support": "^10|^11",
+    "php": "^8.0",
+    "illuminate/support": "^9|^10|^11",
     "phpdocumentor/reflection-docblock": "^5.4"
   },
   "require-dev": {
