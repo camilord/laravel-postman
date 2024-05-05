@@ -1,6 +1,6 @@
 <?php
 
-namespace Phpsa\LaravelPostman;
+namespace Camilo3rd\LaravelPostman;
 
 use phpDocumentor\Reflection\DocBlock\Description;
 use phpDocumentor\Reflection\DocBlock\DescriptionFactory;

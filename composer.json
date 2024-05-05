@@ -42,12 +42,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Phpsa\\LaravelPostman\\": "src"
+      "Camilo3rd\\LaravelPostman\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Phpsa\\LaravelPostman\\Tests\\": "tests"
+      "Camilo3rd\\LaravelPostman\\Tests\\": "tests"
     },
     "files": [
       "vendor/phpunit/phpunit/src/Framework/Assert/Functions.php"
@@ -60,7 +60,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Phpsa\\LaravelPostman\\ServiceProvider"
+        "Camilo3rd\\LaravelPostman\\ServiceProvider"
       ]
     }
   },

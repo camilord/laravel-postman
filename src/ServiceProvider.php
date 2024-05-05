@@ -1,9 +1,9 @@
 <?php
 
-namespace Phpsa\LaravelPostman;
+namespace Camilo3rd\LaravelPostman;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
-use Phpsa\LaravelPostman\Helper;
+use Camilo3rd\LaravelPostman\Helper;
 
 class ServiceProvider extends LaravelServiceProvider
 {

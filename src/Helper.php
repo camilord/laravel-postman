@@ -1,6 +1,6 @@
 <?php
 
-namespace Phpsa\LaravelPostman;
+namespace Camilo3rd\LaravelPostman;
 
 use Illuminate\Support\Str;
 use Illuminate\Routing\Route;
